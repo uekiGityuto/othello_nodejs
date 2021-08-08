@@ -1,4 +1,5 @@
 const readlineSync = require('readline-sync');
+const readlineSync = require('readline-sync');
 
 console.log("スペースもしくはEnterで石置けます")
 console.log("やめたい時はqを押す")
@@ -31,37 +32,25 @@ class Board {
 }
 
 
-// function drawBoard_tomoya() {
-//   const board = "-----------------";
-//   console.log('hello');
-//   return board;
-// }
+function reverse_stone() {
+}
 
-// const board = new Board
-// drawBoard_tomoya()
-// console.log(board.drawBoard());
+const board = new Board
+drawBoard_tomoya()
+console.log(board.drawBoard());
 
 
 const MAX = 60, MIN = 0;
-let cursor = 30, place, key;
+let value = 30, key;
 console.log(`\n\n${(new Array(20)).join(' ')}[Y] <- -> [X]  決定: [q]\n`);
 while (true) {
-  if (place == NULL) {
-    console.log('\x1B[1A\x1B[K|' + (new Array(cursor + 1)).join('-')
-                + 'O'
-                + (new Array(MAX - cursor + 1)).join('-') + '| '
-                + 'now:' + cursor);
-  } else {
-    console.log('\x1B[1A\x1B[K|' + (new Array(cursor + 1)).join('-')
-                + 'O'
-                + (new Array(MAX - cursor + 1)).join('-') + '| '
-                + 'now:' + cursor);
-  }
+  console.log('\x1B[1A\x1B[K|' +
+    (new Array(value + 1)).join('-') + 'O' + (new Array(MAX - value + 1)).join('-') + '| ' + value);
   key = readlineSync.keyIn('',
     {hideEchoBack: true, mask: '', limit: 'yxpq'});
-  if (key === 'y') { if (cursor > MIN) { cursor-=2; } }
-  else if (key === 'x') { if (cursor < MAX) { cursor+=2; } }
-  else if (key === 'p') { if (cursor > MAX && cursor > MIN) { place = cursor; } }
+  if (key === 'y') { if (value > MIN) { value-=2; } }
+  else if (key === 'x') { if (value < MAX) { value+=2; } }
+  else if (key === 'p') { value = 'O' }
   else if (key === 'q') { break; }
 }
-console.log(`\nあなたが決めた値: ${cursor}`);
+console.log(`\nあなたが決めた値: ${value}`);
