@@ -35,7 +35,7 @@ class Stone {
    * @returns {string}
    * @memberof Stone
    */
-  getStone(): string {
+  get(): string {
     if (this.color === Color.white) {
       return 'o';
     } else if (this.color === Color.black) {
@@ -73,7 +73,7 @@ class Cell {
    * @param {number} color
    * @memberof Cell
    */
-  putStone(color: number): void {
+  put(color: number): void {
     this.stone = new Stone(color);
   }
 
@@ -82,8 +82,8 @@ class Cell {
    *
    * @memberof Cell
    */
-  drawCell(): void {
-    const stone = this.stone === null ? ' ' : this.stone.getStone();
+  draw(): void {
+    const stone = this.stone === null ? ' ' : this.stone.get();
     process.stdout.write('|' + stone);
   }
 
@@ -92,7 +92,7 @@ class Cell {
    *
    * @memberof Cell
    */
-  reverseStone() {
+  reverse() {
     if (this.stone !== null) {
       this.stone.color *= -1;
     }
@@ -141,11 +141,11 @@ class Board {
    *
    * @memberof Board
    */
-  drawBoard(): void {
+  draw(): void {
     console.log('  0 1 2 3 4 5 6 7');
     this.board.forEach((line, i) => {
       process.stdout.write(String(i));
-      line.forEach(cell => cell.drawCell());
+      line.forEach(cell => cell.draw());
       process.stdout.write('|\n');
     })
   }
@@ -159,7 +159,7 @@ class Board {
    * @returns {boolean} 選択したマスに石を置けたかどうか
    * @memberof Board
    */
-  putStone(turn: number, input: string): boolean {
+  put(turn: number, input: string): boolean {
     const address = input.split(',');
     if (address.length !== 2) {
       console.log('「行番号,列番号」の形式で入力して下さい');
@@ -180,7 +180,7 @@ class Board {
       if (leftCells.length > 0) {
         canPut = true;
         leftCells.forEach(cell => {
-          cell.reverseStone();
+          cell.reverse();
         });
       }
     }
@@ -190,7 +190,7 @@ class Board {
       if (rightCells.length > 0) {
         canPut = true;
         rightCells.forEach(cell => {
-          cell.reverseStone();
+          cell.reverse();
         });
       }
     }
@@ -200,7 +200,7 @@ class Board {
       if (upCells.length > 0) {
         canPut = true;
         upCells.forEach(cell => {
-          cell.reverseStone();
+          cell.reverse();
         });
       }
     }
@@ -210,7 +210,7 @@ class Board {
       if (downCells.length > 0) {
         canPut = true;
         downCells.forEach(cell => {
-          cell.reverseStone();
+          cell.reverse();
         });
       }
     }
@@ -218,7 +218,7 @@ class Board {
     if (canPut) {
       // 石を置く
       const selectedCell = this.board[v][h];
-      selectedCell.putStone(turn);
+      selectedCell.put(turn);
       return true;
     } else {
       console.log('そこには置けません。')
@@ -412,7 +412,7 @@ console.log('パスをしたい時は「pass」と入力して下さい。');
 let turn = Color.white;
 console.log(turn === Color.white ? '[白の番]' : '[黒の番]');
 const board = new Board();
-board.drawBoard();
+board.draw();
 
 let inputs: string[] = [];
 const reader = require('readline').createInterface({
@@ -426,13 +426,13 @@ reader.on('line', function (input: string) {
     console.log('パスしました。');
     turn *= -1;
   } else {
-    const couldPut = board.putStone(turn, input);
+    const couldPut = board.put(turn, input);
     if (couldPut) {
       turn *= -1;
     }
   }
   console.log(turn === Color.white ? '[白の番]' : '[黒の番]');
-  board.drawBoard();
+  board.draw();
 });
 
 // 終了時の処理
