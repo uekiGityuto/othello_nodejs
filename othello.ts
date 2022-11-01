@@ -215,34 +215,34 @@ class Board {
       console.log('手番が不正です。');
       return false;
     }
-    const address = input.split(',');
-    if (address.length !== 2) {
+    const inputs = input.split(',');
+    if (inputs.length !== 2) {
       console.log('「列番号,行番号」の形式で入力して下さい');
       return false;
     }
-    const x = parseInt(address[0], 10); // 列番号
-    const y = parseInt(address[1], 10); // 行番号
+    const x = parseInt(inputs[0], 10); // 列番号
+    const y = parseInt(inputs[1], 10); // 行番号
     if ((x !== 0 && !x) || (y !== 0 && !y)) {
       console.log('「数字,数字」の形式で入力して下さい');
       return false;
     }
-    let point: Address
+    let address: Address
     try {
-      point = new Address(x, y);
+      address = new Address(x, y);
     } catch {
       console.log('正しい番地を入力して下さい');
       return false;
     }
 
-    const targets = this.search(turn, point);
+    const targets = this.search(turn, address);
     if (targets.length === 0) {
       console.log('そこには置けません。')
       return false;
     }
 
-    this.refCell(point).put(turn);
-    targets.forEach(address => {
-      this.refCell(address).reverse();
+    this.refCell(address).put(turn);
+    targets.forEach(t => {
+      this.refCell(t).reverse();
     })
     return true;
   }
@@ -276,18 +276,18 @@ class Board {
   /**
    * 座標から対象のマスを取得する。
    * 
-   * @param point 座標 
+   * @param address 座標 
    * @returns {Cell}
    */
-  private refCell(point: Address): Cell {
-    return this.board[point.y][point.x];
+  private refCell(address: Address): Cell {
+    return this.board[address.y][address.x];
   }
 
-  private search(turn: number, point: Address): Address[] {
+  private search(turn: number, startPoint: Address): Address[] {
     if (!Color.isValid(turn)) {
       return [];
     }
-    const searchFunc = (current: Address, list: Address[], nextFunc: (current: Address) => Address): Address[] => {
+    const searchFunc = (current: Address, list: Address[], nextFunc: (address: Address) => Address): Address[] => {
       let nextAddress: Address
       try {
         nextAddress = nextFunc(current);
@@ -306,14 +306,14 @@ class Board {
     }
 
     let results: Address[] = [];
-    results = results.concat(searchFunc(point, [], (point) => { return new Address(point.x, point.y - 1) }))
-    results = results.concat(searchFunc(point, [], (point) => { return new Address(point.x, point.y + 1) }))
-    results = results.concat(searchFunc(point, [], (point) => { return new Address(point.x - 1, point.y) }))
-    results = results.concat(searchFunc(point, [], (point) => { return new Address(point.x + 1, point.y) }))
-    results = results.concat(searchFunc(point, [], (point) => { return new Address(point.x - 1, point.y - 1) }))
-    results = results.concat(searchFunc(point, [], (point) => { return new Address(point.x + 1, point.y - 1) }))
-    results = results.concat(searchFunc(point, [], (point) => { return new Address(point.x - 1, point.y + 1) }))
-    results = results.concat(searchFunc(point, [], (point) => { return new Address(point.x + 1, point.y + 1) }))
+    results = results.concat(searchFunc(startPoint, [], (address) => { return new Address(address.x, address.y - 1) }))
+    results = results.concat(searchFunc(startPoint, [], (address) => { return new Address(address.x, address.y + 1) }))
+    results = results.concat(searchFunc(startPoint, [], (address) => { return new Address(address.x - 1, address.y) }))
+    results = results.concat(searchFunc(startPoint, [], (address) => { return new Address(address.x + 1, address.y) }))
+    results = results.concat(searchFunc(startPoint, [], (address) => { return new Address(address.x - 1, address.y - 1) }))
+    results = results.concat(searchFunc(startPoint, [], (address) => { return new Address(address.x + 1, address.y - 1) }))
+    results = results.concat(searchFunc(startPoint, [], (address) => { return new Address(address.x - 1, address.y + 1) }))
+    results = results.concat(searchFunc(startPoint, [], (address) => { return new Address(address.x + 1, address.y + 1) }))
 
     return results;
   }
