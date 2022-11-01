@@ -167,7 +167,7 @@ class Board {
     }
     const v = parseInt(address[0], 10); // 行番号
     const h = parseInt(address[1], 10); // 列番号
-    if (!v || !h) {
+    if ((v !== 0 && !v) || (h !== 0 && !h)) {
       console.log('「数字,数字」の形式で入力して下さい');
       return false;
     }
