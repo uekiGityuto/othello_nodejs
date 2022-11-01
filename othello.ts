@@ -1,3 +1,5 @@
+import internal from "stream";
+
 /**
  * 色クラス
  *
@@ -6,6 +8,16 @@
 class Color {
   static readonly white = -1;
   static readonly black = 1;
+
+  /**
+   * Colorとして妥当かどうかを検証する
+   * 
+   * @param num 
+   * @returns {boolean}
+   */
+  public static isValid(num: number): boolean {
+    return num === Color.white || num === Color.black;
+  }
 }
 
 /**
@@ -17,13 +29,14 @@ class Stone {
   color: number; // -1：白石、1：黒石
 
   /**
-   *Creates an instance of Stone.
+   * Creates an instance of Stone.
+   * 
    * @param {number} color Colorクラスのメンバ（white or black）
    * @memberof Stone
    * @throws {string} エラーメッセージをスローする
    */
   constructor(color: number) {
-    if(color !== Color.white && color !== Color.black) {
+    if (!Color.isValid(color)) {
       throw new Error(`引数には${Color.white}か${Color.black}を指定して下さい。`);
     }
     this.color = color;
@@ -55,7 +68,8 @@ class Cell {
   private stone: Stone | null;
 
   /**
-   *Creates an instance of Cell.
+   * Creates an instance of Cell.
+   * 
    * @param {number} [color]
    * @memberof Cell
    */
@@ -99,6 +113,16 @@ class Cell {
   }
 
   /**
+    * マスに石が置かれていないかどうか。
+    *
+    * @returns {boolean}
+    * @memberof Cell
+    */
+  isNone(): boolean {
+    return this.stone === null
+  }
+
+  /**
    * マスに置いてある石が黒かどうか。
    *
    * @returns {boolean}
@@ -117,6 +141,33 @@ class Cell {
   isWhite(): boolean {
     return this.stone === null ? false : (this.stone.color === Color.white ? true : false);
   }
+
+
+}
+
+/**
+ * 座標クラス
+ *
+ * @class Address
+ */
+class Address {
+  x: number;
+  y: number;
+
+  /**
+   * Creates an instance of Address.
+   * 
+   * @param {number} x
+   * @param {number} y
+   * @memberof Address
+   */
+  constructor(x: number, y: number) {
+    if (x < 0 || x > 7 || y < 0 || y > 7) {
+      throw new Error(`0から7の数字を指定して下さい。`);
+    }
+    this.x = x;
+    this.y = y;
+  }
 }
 
 /**
@@ -125,16 +176,16 @@ class Cell {
  * @class Board
  */
 class Board {
+  private line0 = [new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell()];
   private line1 = [new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell()];
   private line2 = [new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell()];
-  private line3 = [new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell()];
-  private line4 = [new Cell(), new Cell(), new Cell(), new Cell(Color.black), new Cell(Color.white), new Cell(), new Cell(), new Cell()];
-  private line5 = [new Cell(), new Cell(), new Cell(), new Cell(Color.white), new Cell(Color.black), new Cell(), new Cell(), new Cell()];
+  private line3 = [new Cell(), new Cell(), new Cell(), new Cell(Color.black), new Cell(Color.white), new Cell(), new Cell(), new Cell()];
+  private line4 = [new Cell(), new Cell(), new Cell(), new Cell(Color.white), new Cell(Color.black), new Cell(), new Cell(), new Cell()];
+  private line5 = [new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell()];
   private line6 = [new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell()];
   private line7 = [new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell()];
-  private line8 = [new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell()];
 
-  private board = [this.line1, this.line2, this.line3, this.line4, this.line5, this.line6, this.line7, this.line8];
+  private board = [this.line0, this.line1, this.line2, this.line3, this.line4, this.line5, this.line6, this.line7];
 
   /**
    * ボードを描写する。
@@ -155,75 +206,45 @@ class Board {
    * 石を置けた場合はtrue、置けない場合はfalseを返す。
    *
    * @param {number} turn 色（白 or 黒)
-   * @param {string} input ユーザ入力値（「行番号,列番号」の形式を期待）
+   * @param {string} input ユーザ入力値（「列番号,行番号」の形式を期待）
    * @returns {boolean} 選択したマスに石を置けたかどうか
    * @memberof Board
    */
   put(turn: number, input: string): boolean {
-    const address = input.split(',');
-    if (address.length !== 2) {
-      console.log('「行番号,列番号」の形式で入力して下さい');
+    if (!Color.isValid(turn)) {
+      console.log('手番が不正です。');
       return false;
     }
-    const v = parseInt(address[0], 10); // 行番号
-    const h = parseInt(address[1], 10); // 列番号
-    if ((v !== 0 && !v) || (h !== 0 && !h)) {
+    const address = input.split(',');
+    if (address.length !== 2) {
+      console.log('「列番号,行番号」の形式で入力して下さい');
+      return false;
+    }
+    const x = parseInt(address[0], 10); // 列番号
+    const y = parseInt(address[1], 10); // 行番号
+    if ((x !== 0 && !x) || (y !== 0 && !y)) {
       console.log('「数字,数字」の形式で入力して下さい');
       return false;
     }
-
-    let canPut = false;
-
-    if (v >= 0) {
-      // 左方向に探索して、反転出来る石（対戦相手の石）を取得
-      const leftCells = this.getCanReverseLeftCells(v, h, turn);
-      if (leftCells.length > 0) {
-        canPut = true;
-        leftCells.forEach(cell => {
-          cell.reverse();
-        });
-      }
-    }
-    if (v <= 7) {
-      // 右方向に探索して、反転出来る石（対戦相手の石）を取得
-      const rightCells = this.getCanReverseRightCells(v, h, turn);
-      if (rightCells.length > 0) {
-        canPut = true;
-        rightCells.forEach(cell => {
-          cell.reverse();
-        });
-      }
-    }
-    if (h >= 0) {
-      // 上方向に探索して、反転出来る石（対戦相手の石）を取得
-      const upCells = this.getCanReverseUpCells(v, h, turn);
-      if (upCells.length > 0) {
-        canPut = true;
-        upCells.forEach(cell => {
-          cell.reverse();
-        });
-      }
-    }
-    if (h <= 7) {
-      // 下方向に探索して、反転出来る石（対戦相手の石）を取得
-      const downCells = this.getCanReverseDownCells(v, h, turn);
-      if (downCells.length > 0) {
-        canPut = true;
-        downCells.forEach(cell => {
-          cell.reverse();
-        });
-      }
+    let point: Address
+    try {
+      point = new Address(x, y);
+    } catch {
+      console.log('正しい番地を入力して下さい');
+      return false;
     }
 
-    if (canPut) {
-      // 石を置く
-      const selectedCell = this.board[v][h];
-      selectedCell.put(turn);
-      return true;
-    } else {
+    const targets = this.search(turn, point);
+    if (targets.length === 0) {
       console.log('そこには置けません。')
       return false;
     }
+
+    this.refCell(point).put(turn);
+    targets.forEach(address => {
+      this.refCell(address).reverse();
+    })
+    return true;
   }
 
   /**
@@ -253,159 +274,56 @@ class Board {
   }
 
   /**
-   * 左方向に探索して、反転出来る石（対戦相手の石）を取得する。
-   *
-   * @private
-   * @param {number} v 行番号
-   * @param {number} h 列番号
-   * @param {number} turn 色（白 or 黒)
-   * @returns {Cell[]}
-   * @memberof Board
+   * 座標から対象のマスを取得する。
+   * 
+   * @param point 座標 
+   * @returns {Cell}
    */
-  private getCanReverseLeftCells(v: number, h: number, turn: number): Cell[] {
-    let canReverseCells: Cell[] = [];
-    let opponentCells: Cell[] = [];
-    // 左方向に順番に確認する
-    for (let i = h - 1; i > 0; i--) {
-      const aroundCell = this.board[v][i];
-      if (turn === Color.white) { // 白の番の場合
-        if (aroundCell.isBlack()) {
-          opponentCells.push(aroundCell);
-        } else if (aroundCell.isWhite() && opponentCells.length > 0) {
-          canReverseCells = opponentCells;
-        } else {
-          break;
-        }
-      } else { // 黒の番の場合
-        if (aroundCell.isWhite()) {
-          opponentCells.push(aroundCell);
-        } else if (aroundCell.isBlack() && opponentCells.length > 0) {
-          canReverseCells = opponentCells;
-        } else {
-          break;
-        }
-      }
-    }
-    return canReverseCells;
+  private refCell(point: Address): Cell {
+    return this.board[point.y][point.x];
   }
 
-
-  /**
-   * 右方向に探索して、反転出来る石（対戦相手の石）を取得する。
-   *
-   * @private
-   * @param {number} v 行番号
-   * @param {number} h 列番号
-   * @param {number} turn 色（白 or 黒)
-   * @returns {Cell[]}
-   * @memberof Board
-   */
-  private getCanReverseRightCells(v: number, h: number, turn: number): Cell[] {
-    let canReverseCells: Cell[] = [];
-    let opponentCells: Cell[] = [];
-    // 右方向に順番に確認する
-    for (let i = h + 1; i < 8; i++) {
-      const aroundCell = this.board[v][i];
-      if (turn === Color.white) { // 白の番の場合
-        if (aroundCell.isBlack()) {
-          opponentCells.push(aroundCell);
-        } else if (aroundCell.isWhite() && opponentCells.length > 0) {
-          canReverseCells = opponentCells;
-        } else {
-          break;
-        }
-      } else { // 黒の番の場合
-        if (aroundCell.isWhite()) {
-          opponentCells.push(aroundCell);
-        } else if (aroundCell.isBlack() && opponentCells.length > 0) {
-          canReverseCells = opponentCells;
-        } else {
-          break;
-        }
-      }
+  private search(turn: number, point: Address): Address[] {
+    if (!Color.isValid(turn)) {
+      return [];
     }
-    return canReverseCells;
+    const searchFunc = (current: Address, list: Address[], nextFunc: (current: Address) => Address): Address[] => {
+      let nextAddress: Address
+      try {
+        nextAddress = nextFunc(current);
+      } catch {
+        return [];
+      }
+      const nextCell = this.refCell(nextAddress);
+      if (nextCell.isNone()) {
+        return [];
+      }
+      if ((nextCell.isBlack() && turn === Color.white) || (nextCell.isWhite() && turn === Color.black)) {
+        list.push(nextAddress);
+        return searchFunc(nextAddress, list, nextFunc);
+      }
+      return list;
+    }
+
+    let results: Address[] = [];
+    results = results.concat(searchFunc(point, [], (point) => { return new Address(point.x, point.y - 1) }))
+    results = results.concat(searchFunc(point, [], (point) => { return new Address(point.x, point.y + 1) }))
+    results = results.concat(searchFunc(point, [], (point) => { return new Address(point.x - 1, point.y) }))
+    results = results.concat(searchFunc(point, [], (point) => { return new Address(point.x + 1, point.y) }))
+    results = results.concat(searchFunc(point, [], (point) => { return new Address(point.x - 1, point.y - 1) }))
+    results = results.concat(searchFunc(point, [], (point) => { return new Address(point.x + 1, point.y - 1) }))
+    results = results.concat(searchFunc(point, [], (point) => { return new Address(point.x - 1, point.y + 1) }))
+    results = results.concat(searchFunc(point, [], (point) => { return new Address(point.x + 1, point.y + 1) }))
+
+    return results;
   }
 
-  /**
-   * 上方向に探索して、反転出来る石（対戦相手の石）を取得する。
-   *
-   * @private
-   * @param {number} v 行番号
-   * @param {number} h 列番号
-   * @param {number} turn 色（白 or 黒)
-   * @returns {Cell[]}
-   * @memberof Board
-   */
-  private getCanReverseUpCells(v: number, h: number, turn: number): Cell[] {
-    let canReverseCells: Cell[] = [];
-    let opponentCells: Cell[] = [];
-    // 上方向に順番に確認する
-    for (let i = v - 1; i > 0; i--) {
-      const aroundCell = this.board[i][h];
-      if (turn === Color.white) { // 白の番の場合
-        if (aroundCell.isBlack()) {
-          opponentCells.push(aroundCell);
-        } else if (aroundCell.isWhite() && opponentCells.length > 0) {
-          canReverseCells = opponentCells;
-        } else {
-          break;
-        }
-      } else { // 黒の番の場合
-        if (aroundCell.isWhite()) {
-          opponentCells.push(aroundCell);
-        } else if (aroundCell.isBlack() && opponentCells.length > 0) {
-          canReverseCells = opponentCells;
-        } else {
-          break;
-        }
-      }
-    }
-    return canReverseCells;
-  }
-
-  /**
-   * 下方向に探索して、反転出来る石（対戦相手の石）を取得する。
-   *
-   * @private
-   * @param {number} v 行番号
-   * @param {number} h 列番号
-   * @param {number} turn 色（白 or 黒)
-   * @returns {Cell[]}
-   * @memberof Board
-   */
-  private getCanReverseDownCells(v: number, h: number, turn: number): Cell[] {
-    let canReverseCells: Cell[] = [];
-    let opponentCells: Cell[] = [];
-    // 上方向に順番に確認する
-    for (let i = v + 1; i < 8; i++) {
-      const aroundCell = this.board[i][h];
-      if (turn === Color.white) { // 白の番の場合
-        if (aroundCell.isBlack()) {
-          opponentCells.push(aroundCell);
-        } else if (aroundCell.isWhite() && opponentCells.length > 0) {
-          canReverseCells = opponentCells;
-        } else {
-          break;
-        }
-      } else { // 黒の番の場合
-        if (aroundCell.isWhite()) {
-          opponentCells.push(aroundCell);
-        } else if (aroundCell.isBlack() && opponentCells.length > 0) {
-          canReverseCells = opponentCells;
-        } else {
-          break;
-        }
-      }
-    }
-    return canReverseCells;
-  }
 }
 
 //----------------
 // メイン処理
 //----------------
-console.log('石を置きたい場所を「行番号,列番号」の形式で入力して下さい。例）左上隅の場合：0,0');
+console.log('石を置きたい場所を「列番号,行番号」の形式で入力して下さい。例）左上隅の場合：0,0');
 console.log('やめたい時は「Ctrl + d」を押して下さい。');
 console.log('パスをしたい時は「pass」と入力して下さい。');
 
