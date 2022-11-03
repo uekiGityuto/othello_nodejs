@@ -1,23 +1,12 @@
-import { throws } from "assert";
-import internal from "stream";
 
-/**
- * 色クラス
- *
- * @class Color
- */
-class Color {
-  static readonly white = -1;
-  static readonly black = 1;
-
-  /**
-   * Colorとして妥当かどうかを検証する
-   * 
-   * @param num 
-   * @returns {boolean}
-   */
-  public static isValid(num: number): boolean {
-    return num === Color.white || num === Color.black;
+const white = Symbol();
+const black = Symbol();
+type Color = typeof white | typeof black;
+function reverseColor(color: Color) {
+  if (color === black) {
+    return white;
+  } else {
+    return black;
   }
 }
 
@@ -27,19 +16,15 @@ class Color {
  * @class Stone
  */
 class Stone {
-  private color: number; // -1：白石、1：黒石
+  private color: Color;
 
   /**
    * Creates an instance of Stone.
    * 
-   * @param {number} color Colorクラスのメンバ（white or black）
+   * @param {Color} color
    * @memberof Stone
-   * @throws {string} エラーメッセージをスローする
    */
-  constructor(color: number) {
-    if (!Color.isValid(color)) {
-      throw new Error(`引数には${Color.white}か${Color.black}を指定して下さい。`);
-    }
+  constructor(color: Color) {
     this.color = color;
   }
 
@@ -50,9 +35,9 @@ class Stone {
    * @memberof Stone
    */
   get(): string {
-    if (this.color === Color.white) {
+    if (this.color === white) {
       return 'o';
-    } else if (this.color === Color.black) {
+    } else if (this.color === black) {
       return '●';
     } else {
       return ' ';
@@ -65,19 +50,9 @@ class Stone {
    * @returns {boolean}
    * @memberof Stone
    */
-     isBlack(): boolean {
-      return this.color === Color.black ? true : false;
-    }
-  
-    /**
-     * 白かどうか。
-     *
-     * @returns {boolean}
-     * @memberof Stone
-     */
-    isWhite(): boolean {
-      return this.color === Color.white ? true : false;
-    }
+  isBlack(): boolean {
+    return this.color === black ? true : false;
+  }
 
   /**
    * 反転する。
@@ -85,7 +60,7 @@ class Stone {
    * @memberof Stone
    */
   reverse() {
-      this.color *= -1;
+    this.color = reverseColor(this.color);
   }
 }
 
@@ -100,10 +75,10 @@ class Cell {
   /**
    * Creates an instance of Cell.
    * 
-   * @param {number} [color]
+   * @param {Color} color
    * @memberof Cell
    */
-  constructor(color?: number) {
+  constructor(color?: Color) {
     if (color) {
       this.stone = new Stone(color);
     } else {
@@ -114,10 +89,10 @@ class Cell {
   /**
    * マスに石を置く。
    *
-   * @param {number} color
+   * @param {Color} color
    * @memberof Cell
    */
-  put(color: number): void {
+  put(color: Color): void {
     this.stone = new Stone(color);
   }
 
@@ -149,7 +124,7 @@ class Cell {
     * @memberof Cell
     */
   isNone(): boolean {
-    return this.stone === null
+    return this.stone === null;
   }
 
   /**
@@ -169,7 +144,7 @@ class Cell {
    * @memberof Cell
    */
   isWhite(): boolean {
-    return this.stone === null ? false : (this.stone.isWhite() ? true : false);
+    return this.stone === null ? false : (this.stone.isBlack() ? false : true);
   }
 
 
@@ -214,11 +189,11 @@ class Board {
    * @memberof Board
    */
   constructor() {
-    this.board = [...Array(8)].map(_ => {return [...Array(8)].map(_ => new Cell())});
-    this.board[3][3].put(Color.black);
-    this.board[3][4].put(Color.white);
-    this.board[4][3].put(Color.white);
-    this.board[4][4].put(Color.black);
+    this.board = [...Array(8)].map(_ => { return [...Array(8)].map(_ => new Cell()) });
+    this.board[3][3].put(black);
+    this.board[3][4].put(white);
+    this.board[4][3].put(white);
+    this.board[4][4].put(black);
   }
 
   /**
@@ -239,16 +214,12 @@ class Board {
    * 石を置けるかどうか判断し、置ける場合は置く。また、周囲の石を反転する。
    * 石を置けた場合はtrue、置けない場合はfalseを返す。
    *
-   * @param {number} turn 色（白 or 黒)
+   * @param {Color} turn 色（白 or 黒)
    * @param {string} input ユーザ入力値（「列番号,行番号」の形式を期待）
    * @returns {boolean} 選択したマスに石を置けたかどうか
    * @memberof Board
    */
-  put(turn: number, input: string): boolean {
-    if (!Color.isValid(turn)) {
-      console.log('手番が不正です。');
-      return false;
-    }
+  put(turn: Color, input: string): boolean {
     const inputs = input.split(',');
     if (inputs.length !== 2) {
       console.log('「列番号,行番号」の形式で入力して下さい');
@@ -317,10 +288,7 @@ class Board {
     return this.board[address.y][address.x];
   }
 
-  private search(turn: number, startPoint: Address): Address[] {
-    if (!Color.isValid(turn)) {
-      return [];
-    }
+  private search(turn: Color, startPoint: Address): Address[] {
     const searchFunc = (current: Address, list: Address[], nextFunc: (address: Address) => Address): Address[] => {
       let nextAddress: Address
       try {
@@ -332,7 +300,7 @@ class Board {
       if (nextCell.isNone()) {
         return [];
       }
-      if ((nextCell.isBlack() && turn === Color.white) || (nextCell.isWhite() && turn === Color.black)) {
+      if ((nextCell.isBlack() && turn === white) || (nextCell.isWhite() && turn === black)) {
         list.push(nextAddress);
         return searchFunc(nextAddress, list, nextFunc);
       }
@@ -361,8 +329,9 @@ console.log('石を置きたい場所を「列番号,行番号」の形式で入
 console.log('やめたい時は「Ctrl + d」を押して下さい。');
 console.log('パスをしたい時は「pass」と入力して下さい。');
 
-let turn = Color.white;
-console.log(turn === Color.white ? '[白の番]' : '[黒の番]');
+let turn: Color;
+turn = white;
+console.log(turn === white ? '[白の番]' : '[黒の番]');
 const board = new Board();
 board.draw();
 
@@ -375,14 +344,14 @@ const reader = require('readline').createInterface({
 reader.on('line', function (input: string) {
   if (input === 'pass') {
     console.log('パスしました。');
-    turn *= -1;
+    turn = reverseColor(turn)
   } else {
     const couldPut = board.put(turn, input);
     if (couldPut) {
-      turn *= -1;
+      turn = reverseColor(turn)
     }
   }
-  console.log(turn === Color.white ? '[白の番]' : '[黒の番]');
+  console.log(turn === white ? '[白の番]' : '[黒の番]');
   board.draw();
 });
 
