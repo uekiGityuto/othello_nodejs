@@ -1,3 +1,4 @@
+import { throws } from "assert";
 import internal from "stream";
 
 /**
@@ -26,7 +27,7 @@ class Color {
  * @class Stone
  */
 class Stone {
-  color: number; // -1：白石、1：黒石
+  private color: number; // -1：白石、1：黒石
 
   /**
    * Creates an instance of Stone.
@@ -56,6 +57,35 @@ class Stone {
     } else {
       return ' ';
     }
+  }
+
+  /**
+   * 黒かどうか。
+   *
+   * @returns {boolean}
+   * @memberof Stone
+   */
+     isBlack(): boolean {
+      return this.color === Color.black ? true : false;
+    }
+  
+    /**
+     * 白かどうか。
+     *
+     * @returns {boolean}
+     * @memberof Stone
+     */
+    isWhite(): boolean {
+      return this.color === Color.white ? true : false;
+    }
+
+  /**
+   * 反転する。
+   *
+   * @memberof Stone
+   */
+  reverse() {
+      this.color *= -1;
   }
 }
 
@@ -108,7 +138,7 @@ class Cell {
    */
   reverse() {
     if (this.stone !== null) {
-      this.stone.color *= -1;
+      this.stone.reverse();
     }
   }
 
@@ -129,7 +159,7 @@ class Cell {
    * @memberof Cell
    */
   isBlack(): boolean {
-    return this.stone === null ? false : (this.stone.color === Color.black ? true : false);
+    return this.stone === null ? false : (this.stone.isBlack() ? true : false);
   }
 
   /**
@@ -139,7 +169,7 @@ class Cell {
    * @memberof Cell
    */
   isWhite(): boolean {
-    return this.stone === null ? false : (this.stone.color === Color.white ? true : false);
+    return this.stone === null ? false : (this.stone.isWhite() ? true : false);
   }
 
 
@@ -176,16 +206,20 @@ class Address {
  * @class Board
  */
 class Board {
-  private line0 = [new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell()];
-  private line1 = [new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell()];
-  private line2 = [new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell()];
-  private line3 = [new Cell(), new Cell(), new Cell(), new Cell(Color.black), new Cell(Color.white), new Cell(), new Cell(), new Cell()];
-  private line4 = [new Cell(), new Cell(), new Cell(), new Cell(Color.white), new Cell(Color.black), new Cell(), new Cell(), new Cell()];
-  private line5 = [new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell()];
-  private line6 = [new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell()];
-  private line7 = [new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell(), new Cell()];
+  private board: Cell[][];
 
-  private board = [this.line0, this.line1, this.line2, this.line3, this.line4, this.line5, this.line6, this.line7];
+  /**
+   * Creates an instance of Board.
+   * 
+   * @memberof Board
+   */
+  constructor() {
+    this.board = [...Array(8)].map(_ => {return [...Array(8)].map(_ => new Cell())});
+    this.board[3][3].put(Color.black);
+    this.board[3][4].put(Color.white);
+    this.board[4][3].put(Color.white);
+    this.board[4][4].put(Color.black);
+  }
 
   /**
    * ボードを描写する。
@@ -194,9 +228,9 @@ class Board {
    */
   draw(): void {
     console.log('  0 1 2 3 4 5 6 7');
-    this.board.forEach((line, i) => {
+    this.board.forEach((row, i) => {
       process.stdout.write(String(i));
-      line.forEach(cell => cell.draw());
+      row.forEach(cell => cell.draw());
       process.stdout.write('|\n');
     })
   }
@@ -332,7 +366,6 @@ console.log(turn === Color.white ? '[白の番]' : '[黒の番]');
 const board = new Board();
 board.draw();
 
-let inputs: string[] = [];
 const reader = require('readline').createInterface({
   input: process.stdin,
   output: process.stdout
