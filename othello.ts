@@ -1,12 +1,11 @@
-
-const white = Symbol();
-const black = Symbol();
-type Color = typeof white | typeof black;
+const WHITE = Symbol();
+const BLACK = Symbol();
+type Color = typeof WHITE | typeof BLACK;
 function reverseColor(color: Color) {
-  if (color === black) {
-    return white;
+  if (color === BLACK) {
+    return WHITE;
   } else {
-    return black;
+    return BLACK;
   }
 }
 
@@ -35,9 +34,9 @@ class Stone {
    * @memberof Stone
    */
   get(): string {
-    if (this.color === white) {
+    if (this.color === WHITE) {
       return 'o';
-    } else if (this.color === black) {
+    } else if (this.color === BLACK) {
       return '●';
     } else {
       return ' ';
@@ -51,7 +50,7 @@ class Stone {
    * @memberof Stone
    */
   isBlack(): boolean {
-    return this.color === black ? true : false;
+    return this.color === BLACK ? true : false;
   }
 
   /**
@@ -190,10 +189,10 @@ class Board {
    */
   constructor() {
     this.board = [...Array(8)].map(_ => { return [...Array(8)].map(_ => new Cell()) });
-    this.board[3][3].put(black);
-    this.board[3][4].put(white);
-    this.board[4][3].put(white);
-    this.board[4][4].put(black);
+    this.board[3][3].put(BLACK);
+    this.board[3][4].put(WHITE);
+    this.board[4][3].put(WHITE);
+    this.board[4][4].put(BLACK);
   }
 
   /**
@@ -300,7 +299,7 @@ class Board {
       if (nextCell.isNone()) {
         return [];
       }
-      if ((nextCell.isBlack() && turn === white) || (nextCell.isWhite() && turn === black)) {
+      if ((nextCell.isBlack() && turn === WHITE) || (nextCell.isWhite() && turn === BLACK)) {
         list.push(nextAddress);
         return searchFunc(nextAddress, list, nextFunc);
       }
@@ -330,8 +329,8 @@ console.log('やめたい時は「Ctrl + d」を押して下さい。');
 console.log('パスをしたい時は「pass」と入力して下さい。');
 
 let turn: Color;
-turn = white;
-console.log(turn === white ? '[白の番]' : '[黒の番]');
+turn = WHITE;
+console.log(turn === WHITE ? '[白の番]' : '[黒の番]');
 const board = new Board();
 board.draw();
 
@@ -351,7 +350,7 @@ reader.on('line', function (input: string) {
       turn = reverseColor(turn)
     }
   }
-  console.log(turn === white ? '[白の番]' : '[黒の番]');
+  console.log(turn === WHITE ? '[白の番]' : '[黒の番]');
   board.draw();
 });
 
