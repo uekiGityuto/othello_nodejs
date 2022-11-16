@@ -21,3 +21,5 @@ test('Stoneのreverseで石の色が反転できること', () => {
   stone.reverse()
   expect(stone).toStrictEqual(new Stone(BLACK))
 });
+
+// testの書き方を確認したかっただけなので他のテストは省略（やる気になった時に作成する）
