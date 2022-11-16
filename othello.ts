@@ -51,7 +51,7 @@ class Stone {
    *
    * @memberof Stone
    */
-  reverse() {
+  reverse(): void {
     if (this.color === BLACK) {
       this.color = WHITE;
     } else {
@@ -107,7 +107,7 @@ class Cell {
    *
    * @memberof Cell
    */
-  reverse() {
+  reverse(): void {
     if (this.stone !== null) {
       this.stone.reverse();
     }
@@ -213,6 +213,7 @@ class Board {
    * @param {Color} turn 色（白 or 黒)
    * @param {Address} address 石を置くマスの座標
    * @returns {boolean} 選択したマスに石を置けたかどうか
+   * 
    * @memberof Board
    */
   put(turn: Color, address: Address): boolean {
@@ -307,9 +308,10 @@ class Controller {
   private turn: Color;
   private board: Board;
 
+
   /**
-   * Creates an instance of Board.
-   * 
+   * Creates an instance of Controller.
+   * @param {Color} turn
    * @memberof Controller
    */
   constructor(turn: Color) {
@@ -317,6 +319,10 @@ class Controller {
     this.board = new Board()
   }
 
+  /**
+   * ターンを交代する。
+   * @memberof Controller
+   */
   changeTurn(): void {
     if (this.turn === BLACK) {
       this.turn = WHITE;
@@ -325,6 +331,13 @@ class Controller {
     }
   }
 
+  /**
+   * 入力値のバリデーションをする。
+   *
+   * @param {string} input
+   * @returns {boolean}
+   * @memberof Controller
+   */
   validate(input: string): boolean {
     const inputs = input.split(',');
     if (inputs.length !== 2) {
@@ -338,6 +351,11 @@ class Controller {
     return true;
   }
 
+  /**
+   * ゲーム開始する
+   *
+   * @memberof Controller
+   */
   start(): void {
     console.log('石を置きたい場所を「列番号,行番号」の形式で入力して下さい。例）左上隅の場合：0,0');
     console.log('やめたい時は「Ctrl + d」を押して下さい。');
@@ -380,12 +398,18 @@ class Controller {
       this.next(true);
     });
 
-    // 終了時の処理
     reader.on('close', () => {
       this.board.displayResult();
     });
   }
 
+
+  /**
+   * ユーザが次の入力が出来るように処理をする
+   *
+   * @param {boolean} isChange
+   * @memberof Controller
+   */
   next(isChange: boolean): void {
     if (isChange) {
       this.changeTurn();
@@ -395,6 +419,7 @@ class Controller {
   }
 }
 
+// メイン処理
 const main = () => {
   const ctrl = new Controller(WHITE);
   ctrl.start();
