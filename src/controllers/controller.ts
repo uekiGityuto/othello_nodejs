@@ -1,4 +1,5 @@
 import { Address, BLACK, Board, Color, WHITE } from '../models/model';
+import * as readline from "readline";
 
 /**
  * コントローラークラス
@@ -66,7 +67,7 @@ export class Controller {
         console.log('やめたい時は「Ctrl + d」を押して下さい。');
         console.log('パスをしたい時は「pass」と入力して下さい。');
 
-        const reader = require('readline').createInterface({
+        const reader = readline.createInterface({
             input: process.stdin,
             output: process.stdout
         });
