@@ -1,3 +1,4 @@
+
 const WHITE = Symbol();
 const BLACK = Symbol();
 type Color = typeof WHITE | typeof BLACK;
@@ -230,29 +231,35 @@ class Board {
   }
 
   /**
-   * 結果を描写する。
+   * 黒石の数を返す。
    *
+   * @returns {number}
    * @memberof Board
    */
-  displayResult(): void {
-    let whiteNum = 0;
-    let blackNum = 0;
+  countBlack(): number {
+    let count = 0;
     this.board.forEach(line => {
       line.forEach(cell => {
-        whiteNum += cell.isWhite() ? 1 : 0;
-        blackNum += cell.isBlack() ? 1 : 0;
+        count += cell.isBlack() ? 1 : 0;
       });
     });
+    return count;
+  }
 
-    console.log(`白：${whiteNum}個`);
-    console.log(`黒：${blackNum}個`);
-    if (whiteNum > blackNum) {
-      console.log('白の勝利です。');
-    } else if (whiteNum < blackNum) {
-      console.log('黒の勝利です。');
-    } else {
-      console.log('引き分けです。');
-    }
+  /**
+   * 白石の数を返す。
+   *
+   * @returns {number}
+   * @memberof Board
+   */
+  countWhite(): number {
+    let count = 0;
+    this.board.forEach(line => {
+      line.forEach(cell => {
+        count += cell.isWhite() ? 1 : 0;
+      });
+    });
+    return count;
   }
 
   /**
@@ -319,7 +326,6 @@ class Controller {
   private turn: Color;
   private board: Board;
 
-
   /**
    * Creates an instance of Controller.
    * @param {Color} turn
@@ -331,10 +337,11 @@ class Controller {
   }
 
   /**
-   * ターンを交代する。
+   * ターンを交代する
+   * 。
    * @memberof Controller
    */
-  changeTurn(): void {
+  private changeTurn(): void {
     if (this.turn === BLACK) {
       this.turn = WHITE;
     } else {
@@ -349,7 +356,7 @@ class Controller {
    * @returns {boolean}
    * @memberof Controller
    */
-  validate(input: string): boolean {
+  private validate(input: string): boolean {
     const inputs = input.split(',');
     if (inputs.length !== 2) {
       return false;
@@ -363,7 +370,7 @@ class Controller {
   }
 
   /**
-   * ゲーム開始する
+   * ゲーム開始処理（メイン処理）
    *
    * @memberof Controller
    */
@@ -410,23 +417,41 @@ class Controller {
     });
 
     reader.on('close', () => {
-      this.board.displayResult();
+      this.end()
     });
   }
 
-
   /**
-   * ユーザが次の入力が出来るように処理をする
+   * 次の処理
    *
    * @param {boolean} isChange
    * @memberof Controller
    */
-  next(isChange: boolean): void {
+  private next(isChange: boolean): void {
     if (isChange) {
       this.changeTurn();
     }
     console.log(this.turn === WHITE ? '[白の番]' : '[黒の番]');
     this.board.draw();
+  }
+
+  /**
+   * 最後の処理
+   *
+   * @memberof Controller
+   */
+  private end(): void {
+    const blackNum = this.board.countBlack();
+    const whiteNum = this.board.countWhite();
+    console.log(`白：${whiteNum}個`);
+    console.log(`黒：${blackNum}個`);
+    if (whiteNum > blackNum) {
+      console.log('白の勝利です。');
+    } else if (whiteNum < blackNum) {
+      console.log('黒の勝利です。');
+    } else {
+      console.log('引き分けです。');
+    }
   }
 }
 
