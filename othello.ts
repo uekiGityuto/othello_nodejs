@@ -190,7 +190,7 @@ class Board {
 
   /**
    * Creates an instance of Board.
-   * 
+   *
    * @memberof Board
    */
   constructor() {
