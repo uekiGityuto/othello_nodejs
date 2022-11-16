@@ -18,9 +18,14 @@ node, npm
 npm install
 ```
 
+## テスト方法
+```
+npm t
+```
+
 ## 実行方法
 ```
-npx ts-node othello.ts
+npx ts-node src/main.ts
 ```
 
 ## 遊び方
