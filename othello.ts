@@ -1,13 +1,6 @@
 const WHITE = Symbol();
 const BLACK = Symbol();
 type Color = typeof WHITE | typeof BLACK;
-function reverseColor(color: Color) {
-  if (color === BLACK) {
-    return WHITE;
-  } else {
-    return BLACK;
-  }
-}
 
 /**
  * 石クラス
@@ -59,7 +52,11 @@ class Stone {
    * @memberof Stone
    */
   reverse() {
-    this.color = reverseColor(this.color);
+    if (this.color === BLACK) {
+      this.color = WHITE;
+    } else {
+      this.color = BLACK;
+    }
   }
 }
 
@@ -214,33 +211,13 @@ class Board {
    * 石を置けた場合はtrue、置けない場合はfalseを返す。
    *
    * @param {Color} turn 色（白 or 黒)
-   * @param {string} input ユーザ入力値（「列番号,行番号」の形式を期待）
+   * @param {Address} address 石を置くマスの座標
    * @returns {boolean} 選択したマスに石を置けたかどうか
    * @memberof Board
    */
-  put(turn: Color, input: string): boolean {
-    const inputs = input.split(',');
-    if (inputs.length !== 2) {
-      console.log('「列番号,行番号」の形式で入力して下さい');
-      return false;
-    }
-    const x = parseInt(inputs[0], 10); // 列番号
-    const y = parseInt(inputs[1], 10); // 行番号
-    if ((x !== 0 && !x) || (y !== 0 && !y)) {
-      console.log('「数字,数字」の形式で入力して下さい');
-      return false;
-    }
-    let address: Address
-    try {
-      address = new Address(x, y);
-    } catch {
-      console.log('正しい番地を入力して下さい');
-      return false;
-    }
-
+  put(turn: Color, address: Address): boolean {
     const targets = this.search(turn, address);
     if (targets.length === 0) {
-      console.log('そこには置けません。')
       return false;
     }
 
@@ -321,40 +298,105 @@ class Board {
 
 }
 
-//----------------
-// メイン処理
-//----------------
-console.log('石を置きたい場所を「列番号,行番号」の形式で入力して下さい。例）左上隅の場合：0,0');
-console.log('やめたい時は「Ctrl + d」を押して下さい。');
-console.log('パスをしたい時は「pass」と入力して下さい。');
+/**
+ * コントローラークラス
+ *
+ * @class Controller
+ */
+class Controller {
+  private turn: Color;
+  private board: Board;
 
-let turn: Color;
-turn = WHITE;
-console.log(turn === WHITE ? '[白の番]' : '[黒の番]');
-const board = new Board();
-board.draw();
+  /**
+   * Creates an instance of Board.
+   * 
+   * @memberof Controller
+   */
+  constructor(turn: Color) {
+    this.turn = turn;
+    this.board = new Board()
+  }
 
-const reader = require('readline').createInterface({
-  input: process.stdin,
-  output: process.stdout
-});
-
-// 標準入力時の処理
-reader.on('line', function (input: string) {
-  if (input === 'pass') {
-    console.log('パスしました。');
-    turn = reverseColor(turn)
-  } else {
-    const couldPut = board.put(turn, input);
-    if (couldPut) {
-      turn = reverseColor(turn)
+  changeTurn(): void {
+    if (this.turn === BLACK) {
+      this.turn = WHITE;
+    } else {
+      this.turn = BLACK;
     }
   }
-  console.log(turn === WHITE ? '[白の番]' : '[黒の番]');
-  board.draw();
-});
 
-// 終了時の処理
-reader.on('close', function () {
-  board.displayResult();
-});
+  validate(input: string): boolean {
+    const inputs = input.split(',');
+    if (inputs.length !== 2) {
+      return false;
+    }
+    const x = parseInt(inputs[0], 10); // 列番号
+    const y = parseInt(inputs[1], 10); // 行番号
+    if ((x !== 0 && !x) || (y !== 0 && !y)) {
+      return false;
+    }
+    return true;
+  }
+
+  start(): void {
+    console.log('石を置きたい場所を「列番号,行番号」の形式で入力して下さい。例）左上隅の場合：0,0');
+    console.log('やめたい時は「Ctrl + d」を押して下さい。');
+    console.log('パスをしたい時は「pass」と入力して下さい。');
+
+    const reader = require('readline').createInterface({
+      input: process.stdin,
+      output: process.stdout
+    });
+
+    this.next(false);
+    reader.on('line', (input: string) => {
+      if (input === 'pass') {
+        console.log('パスしました。');
+        this.next(true);
+        return;
+      }
+      if (!this.validate(input)) {
+        console.log('入力内容が不正です。');
+        console.log('石を置きたい場所を「列番号,行番号」の形式で入力して下さい。例）左上隅の場合：0,0');
+        this.next(false);
+        return;
+      }
+      const inputs = input.split(',');
+      const x = parseInt(inputs[0], 10);
+      const y = parseInt(inputs[1], 10);
+      let address: Address
+      try {
+        address = new Address(x, y);
+      } catch {
+        console.log('正しい番地を入力して下さい');
+        this.next(false);
+        return;
+      }
+      if (!this.board.put(this.turn, address)) {
+        console.log('そこには置けません。');
+        this.next(false);
+        return;
+      }
+      this.next(true);
+    });
+
+    // 終了時の処理
+    reader.on('close', () => {
+      this.board.displayResult();
+    });
+  }
+
+  next(isChange: boolean): void {
+    if (isChange) {
+      this.changeTurn();
+    }
+    console.log(this.turn === WHITE ? '[白の番]' : '[黒の番]');
+    this.board.draw();
+  }
+}
+
+const main = () => {
+  const ctrl = new Controller(WHITE);
+  ctrl.start();
+};
+main();
