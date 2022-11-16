@@ -257,14 +257,25 @@ class Board {
 
   /**
    * 座標から対象のマスを取得する。
-   * 
-   * @param address 座標 
+   *
+   * @private
+   * @param {Address} address
    * @returns {Cell}
+   * @memberof Board
    */
   private refCell(address: Address): Cell {
     return this.board[address.y][address.x];
   }
 
+  /**
+   * 裏返せる石があるかどうか探索する。
+   *
+   * @private
+   * @param {Color} turn
+   * @param {Address} startPoint
+   * @returns {Address[]}
+   * @memberof Board
+   */
   private search(turn: Color, startPoint: Address): Address[] {
     const searchFunc = (current: Address, list: Address[], nextFunc: (address: Address) => Address): Address[] => {
       let nextAddress: Address
