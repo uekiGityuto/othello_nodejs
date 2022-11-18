@@ -1,5 +1,5 @@
-import { Address, BLACK, Board, Color, WHITE } from '../models/model';
 import * as readline from "readline";
+import { Address, BLACK, Board, Color, WHITE } from '../models/model';
 
 /**
  * コントローラークラス

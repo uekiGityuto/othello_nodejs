@@ -216,19 +216,19 @@ export class Board {
      * 石を置けるかどうか判断し、置ける場合は置く。また、周囲の石を反転する。
      * 石を置けた場合はtrue、置けない場合はfalseを返す。
      *
-     * @param {Color} turn 色（白 or 黒)
+     * @param {Color} color 色（白 or 黒)
      * @param {Address} address 石を置くマスの座標
      * @returns {boolean} 選択したマスに石を置けたかどうか
      *
      * @memberof Board
      */
-    put(turn: Color, address: Address): boolean {
-        const targets = this.search(turn, address);
+    put(color: Color, address: Address): boolean {
+        const targets = this.search(color, address);
         if (targets.length === 0) {
             return false;
         }
 
-        this.refCell(address).put(turn);
+        this.refCell(address).put(color);
         targets.forEach(t => {
             this.refCell(t).reverse();
         })
@@ -290,8 +290,7 @@ export class Board {
      */
     private search(turn: Color, startPoint: Address): Address[] {
         const searchFunc = (current: Address, list: Address[], nextFunc: (address: Address) => Address): Address[] => {
-            let nextAddress: Address
-            nextAddress = nextFunc(current);
+            const nextAddress = nextFunc(current);
             if (!nextAddress.isValid()) {
                 return [];
             }
