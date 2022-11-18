@@ -127,8 +127,8 @@ export class Controller {
     private end(): void {
         const blackNum = this.board.countBlack();
         const whiteNum = this.board.countWhite();
-        console.log(`白：${whiteNum}個`);
-        console.log(`黒：${blackNum}個`);
+        console.log(`白: ${whiteNum}個`);
+        console.log(`黒: ${blackNum}個`);
         if (whiteNum > blackNum) {
             console.log('白の勝利です。');
         } else if (whiteNum < blackNum) {
