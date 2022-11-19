@@ -9,7 +9,7 @@
       "cwd": "${workspaceFolder}",
       "program": "${file}",
       "outFiles": ["${workspaceFolder}/build/**/*.js"],
-      "console": "integratedTerminal"
+      "console": "integratedTerminal" // 標準入力を受け付けられるようにするため
     }
   ]
 }
