@@ -11,21 +11,21 @@
 - 終了時に勝敗を判定
 
 ## 必要
-node, npm
+node, npm, yarn
 
 ## 環境準備
 ```
-npm install
+yarn install
 ```
 
 ## テスト方法
 ```
-npm t
+yarn test
 ```
 
 ## 実行方法
 ```
-npx ts-node src/main.ts
+yarn run ts-node src/main.ts
 ```
 
 ## 遊び方
