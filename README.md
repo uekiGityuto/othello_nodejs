@@ -1,4 +1,4 @@
-# Othello
+# othello_nodejs
 
 ## 概要
 
