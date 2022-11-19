@@ -63,7 +63,7 @@ export class Controller {
    * @memberof Controller
    */
   start(): void {
-    console.log('石を置きたい場所を「列番号,行番号」の形式で入力して下さい。例）左上隅の場合：0,0');
+    console.log('石を置きたい場所を「列番号,行番号」の形式で入力して下さい。例）左上隅の場合: 0,0');
     console.log('やめたい時は「Ctrl + d」を押して下さい。');
     console.log('パスをしたい時は「pass」と入力して下さい。');
 
