@@ -21,8 +21,8 @@ export class Controller {
   }
 
   /**
-   * ターンを交代する
-   * 。
+   * ターンを交代する。
+   *
    * @memberof Controller
    */
   private changeTurn(): void {

@@ -291,6 +291,7 @@ export class Board {
    * @memberof Board
    */
   private search(turn: Color, startPoint: Address): Address[] {
+    // メモ: thisを束縛出来るようにアロー関数にする
     const searchFunc = (current: Address, list: Address[], nextFunc: (address: Address) => Address): Address[] => {
       const nextAddress = nextFunc(current);
       if (!nextAddress.isValid()) {
