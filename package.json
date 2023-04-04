@@ -20,6 +20,7 @@
     "typescript": "^4.3.5"
   },
   "scripts": {
+    "start": "yarn run ts-node src/main.ts",
     "test": "jest",
     "build": "tsc"
   }

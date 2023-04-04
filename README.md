@@ -51,7 +51,7 @@ yarn tsc
 ## 実行方法
 
 ```
-yarn run ts-node src/main.ts
+yarn start
 ```
 
 ## 遊び方
